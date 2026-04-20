@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 /**
- * CLI entry point for botmux.
+ * CLI entry point for botbridge.
  *
  * Usage:
- *   botmux setup          — interactive first-time configuration
- *   botmux start          — start daemon (pm2)
- *   botmux stop           — stop daemon
- *   botmux restart        — restart daemon (auto-restores sessions)
- *   botmux logs [--lines] — view daemon logs
- *   botmux status         — show daemon status
- *   botmux upgrade        — upgrade to latest version
- *   botmux list           — interactive session picker (TUI), attach to tmux
- *   botmux list --plain   — plain table output (for piping / scripts)
- *   botmux delete <id>    — close a session by ID prefix
- *   botmux delete all     — close all active sessions
+ *   botbridge setup          — interactive first-time configuration
+ *   botbridge start          — start daemon (pm2)
+ *   botbridge stop           — stop daemon
+ *   botbridge restart        — restart daemon (auto-restores sessions)
+ *   botbridge logs [--lines] — view daemon logs
+ *   botbridge status         — show daemon status
+ *   botbridge upgrade        — upgrade to latest version
+ *   botbridge list           — interactive session picker (TUI), attach to tmux
+ *   botbridge list --plain   — plain table output (for piping / scripts)
+ *   botbridge delete <id>    — close a session by ID prefix
+ *   botbridge delete all     — close all active sessions
  */
 import { execSync, spawnSync, spawn } from 'node:child_process';
 import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, renameSync, readdirSync } from 'node:fs';
@@ -29,14 +29,14 @@ const require = createRequire(import.meta.url);
 
 // Package root is one level up from dist/
 const PKG_ROOT = dirname(__dirname);
-const CONFIG_DIR = join(homedir(), '.botmux');
+const CONFIG_DIR = join(homedir(), '.botbridge');
 const ENV_FILE = join(CONFIG_DIR, '.env');
 const DATA_DIR = join(CONFIG_DIR, 'data');
 const LOG_DIR = join(CONFIG_DIR, 'logs');
 const BOTS_JSON_FILE = join(CONFIG_DIR, 'bots.json');
-const PM2_NAME = 'botmux';
+const PM2_NAME = 'botbridge';
 /**
- * Dedicated PM2_HOME for botmux. Isolates our pm2 daemon state from any
+ * Dedicated PM2_HOME for botbridge. Isolates our pm2 daemon state from any
  * other pm2 installation on the machine (e.g. the one bundled in IDE
  * remote-ssh extensions). Prevents stale ProcessContainerFork.js paths
  * when those external pm2 installations get moved or removed.
@@ -106,7 +106,7 @@ function ecosystemConfig(): string {
     name: `${PM2_NAME}-${i}`,
     error_file: join(LOG_DIR, `daemon-${i}-error.log`),
     out_file: join(LOG_DIR, `daemon-${i}-out.log`),
-    env: { SESSION_DATA_DIR: DATA_DIR, BOTMUX_BOT_INDEX: String(i) },
+    env: { SESSION_DATA_DIR: DATA_DIR, BOTBRIDGE_BOT_INDEX: String(i) },
   }));
 
   const cfg = { apps };
@@ -193,7 +193,7 @@ async function writeSingleBotConfig(): Promise<void> {
 
   writeFileSync(BOTS_JSON_FILE, JSON.stringify([bot], null, 2) + '\n');
   console.log(`\n✅ 配置已写入: ${BOTS_JSON_FILE}`);
-  console.log(`\n下一步: botmux start`);
+  console.log(`\n下一步: botbridge start`);
 }
 
 // ─── Commands ────────────────────────────────────────────────────────────────
@@ -204,7 +204,7 @@ async function cmdSetup(): Promise<void> {
   const hasBots = existsSync(BOTS_JSON_FILE);
   const hasEnv = existsSync(ENV_FILE);
 
-  console.log('\n🤖 botmux 配置向导\n');
+  console.log('\n🤖 botbridge 配置向导\n');
   console.log(`配置目录: ${CONFIG_DIR}`);
   console.log(`数据目录: ${DATA_DIR}\n`);
 
@@ -229,7 +229,7 @@ async function cmdSetup(): Promise<void> {
       rl.close();
       writeFileSync(BOTS_JSON_FILE, JSON.stringify([newBot], null, 2) + '\n');
       console.log(`\n✅ 配置已写入: ${BOTS_JSON_FILE}`);
-      console.log(`\n下一步: botmux restart`);
+      console.log(`\n下一步: botbridge restart`);
       return;
     }
 
@@ -241,7 +241,7 @@ async function cmdSetup(): Promise<void> {
     writeFileSync(BOTS_JSON_FILE, JSON.stringify(bots, null, 2) + '\n');
     console.log(`\n✅ 已添加机器人 ${newBot.larkAppId}，共 ${bots.length} 个`);
     console.log(`   配置文件: ${BOTS_JSON_FILE}`);
-    console.log(`\n下一步: botmux restart`);
+    console.log(`\n下一步: botbridge restart`);
 
   } else if (hasEnv) {
     // --- Single-bot mode (.env exists) ---
@@ -277,7 +277,7 @@ async function cmdSetup(): Promise<void> {
     console.log(`\n✅ 已迁移到多机器人配置`);
     console.log(`   配置文件: ${BOTS_JSON_FILE}`);
     console.log(`   旧配置已备份: ${ENV_FILE}.bak`);
-    console.log(`\n下一步: botmux restart`);
+    console.log(`\n下一步: botbridge restart`);
 
   } else {
     // --- Fresh install ---
@@ -288,7 +288,7 @@ async function cmdSetup(): Promise<void> {
 function cmdStart(): void {
   if (!hasConfig()) {
     console.error('❌ 未找到配置文件');
-    console.error('   请先运行: botmux setup');
+    console.error('   请先运行: botbridge setup');
     process.exit(1);
   }
   ensureConfigDir();
@@ -298,12 +298,12 @@ function cmdStart(): void {
   const bots = loadBotsJson();
   const count = bots.length || 1;
   console.log(`\n✅ daemon 已启动${count > 1 ? ` (${count} 个机器人, 每个独立进程)` : ''}`);
-  console.log(`   日志: botmux logs`);
-  console.log(`   状态: botmux status`);
+  console.log(`   日志: botbridge logs`);
+  console.log(`   状态: botbridge status`);
 }
 
-/** Delete all pm2 processes matching botmux / botmux-* under the given PM2_HOME. */
-function deleteAllBotmuxProcesses(home: string = PM2_HOME): void {
+/** Delete all pm2 processes matching botbridge / botbridge-* under the given PM2_HOME. */
+function deleteAllBotbridgeProcesses(home: string = PM2_HOME): void {
   try {
     const output = execSync(`${pm2Bin()} jlist`, {
       encoding: 'utf-8',
@@ -328,9 +328,9 @@ function deleteAllBotmuxProcesses(home: string = PM2_HOME): void {
 
 /**
  * One-time migration for users upgrading from versions that used the default
- * ~/.pm2 directory. Removes any lingering botmux-* processes registered under
+ * ~/.pm2 directory. Removes any lingering botbridge-* processes registered under
  * the legacy home so the new dedicated PM2_HOME becomes the sole source of
- * truth. Only touches processes named `botmux` or `botmux-*` — the user's
+ * truth. Only touches processes named `botbridge` or `botbridge-*` — the user's
  * unrelated pm2 apps are left untouched. No-op on fresh installs.
  */
 function cleanupLegacyPm2(): boolean {
@@ -345,7 +345,7 @@ function cleanupLegacyPm2(): boolean {
   // If the legacy daemon isn't alive anymore there's nothing to clean.
   try { process.kill(legacyPid, 0); } catch { return false; }
 
-  deleteAllBotmuxProcesses(legacyHome);
+  deleteAllBotbridgeProcesses(legacyHome);
   return true;
 }
 
@@ -372,23 +372,23 @@ function cmdStop(): void {
 function cmdRestart(): void {
   if (!hasConfig()) {
     console.error('❌ 未找到配置文件');
-    console.error('   请先运行: botmux setup');
+    console.error('   请先运行: botbridge setup');
     process.exit(1);
   }
   ensureConfigDir();
   cleanupLegacyPm2();
-  // Delete all botmux processes (handles both old single-process and new multi-process)
-  deleteAllBotmuxProcesses();
+  // Delete all botbridge processes (handles both old single-process and new multi-process)
+  deleteAllBotbridgeProcesses();
   const cfg = ecosystemConfig();
   runPm2(['start', cfg]);
 }
 
 /**
- * If a legacy ~/.pm2 daemon with botmux processes still exists alongside our
+ * If a legacy ~/.pm2 daemon with botbridge processes still exists alongside our
  * new PM2_HOME, warn the user so read-only commands (status/logs) don't
  * silently show an empty new home while the old daemon keeps running.
  */
-function warnIfLegacyBotmuxAlive(): void {
+function warnIfLegacyBotbridgeAlive(): void {
   const legacyHome = join(homedir(), '.pm2');
   if (legacyHome === PM2_HOME) return;
   const legacyPidFile = join(legacyHome, 'pm2.pid');
@@ -405,20 +405,19 @@ function warnIfLegacyBotmuxAlive(): void {
       timeout: 10_000,
     });
     const apps = JSON.parse(output) as any[];
-    const hasBotmux = apps.some(a => a.name === PM2_NAME || a.name.startsWith(`${PM2_NAME}-`));
-    if (hasBotmux) {
-      console.warn('⚠️  检测到旧版 PM2_HOME (~/.pm2) 下仍有 botmux 进程,运行 `botmux restart` 完成迁移。\n');
+    const hasBotbridge = apps.some(a => a.name === PM2_NAME || a.name.startsWith(`${PM2_NAME}-`));
+    if (hasBotbridge) {
+      console.warn('⚠️  检测到旧版 PM2_HOME (~/.pm2) 下仍有 botbridge 进程,运行 `botbridge restart` 完成迁移。\n');
     }
   } catch { /* ignore */ }
 }
 
 function cmdLogs(): void {
-  warnIfLegacyBotmuxAlive();
+  warnIfLegacyBotbridgeAlive();
   const lines = process.argv.includes('--lines')
     ? process.argv[process.argv.indexOf('--lines') + 1] || '50'
     : '50';
 
-  const bots = loadBotsJson();
   // Support --bot <index> to filter specific bot logs
   const botIdx = process.argv.includes('--bot')
     ? process.argv[process.argv.indexOf('--bot') + 1]
@@ -428,7 +427,7 @@ function cmdLogs(): void {
   if (botIdx !== undefined) {
     target = `${PM2_NAME}-${botIdx}`;
   } else {
-    // Show all botmux logs via pm2 regex match
+    // Show all botbridge logs via pm2 regex match
     target = `/^${PM2_NAME}/`;
   }
 
@@ -441,17 +440,17 @@ function cmdLogs(): void {
 }
 
 function cmdStatus(): void {
-  warnIfLegacyBotmuxAlive();
+  warnIfLegacyBotbridgeAlive();
   runPm2(['status']);
 }
 
 function cmdUpgrade(): void {
   console.log('🔄 升级中...');
   try {
-    execSync('npm install -g botmux@latest', { stdio: 'inherit' });
-    console.log('\n✅ 升级完成。运行 botmux restart 以应用更新。');
+    execSync('npm install -g botbridge@latest', { stdio: 'inherit' });
+    console.log('\n✅ 升级完成。运行 botbridge restart 以应用更新。');
   } catch {
-    console.error('❌ 升级失败，请手动运行: npm install -g botmux@latest');
+    console.error('❌ 升级失败，请手动运行: npm install -g botbridge@latest');
     process.exit(1);
   }
 }
@@ -476,7 +475,7 @@ interface SessionData {
 
 /**
  * Resolve the session data directory.
- * Priority: SESSION_DATA_DIR env > daemon breadcrumb (~/.botmux/.data-dir) > default (~/.botmux/data)
+ * Priority: SESSION_DATA_DIR env > daemon breadcrumb (~/.botbridge/.data-dir) > default (~/.botbridge/data)
  */
 function resolveDataDir(): string {
   if (process.env.SESSION_DATA_DIR) return process.env.SESSION_DATA_DIR;
@@ -822,7 +821,7 @@ function interactiveSessionPicker(active: SessionData[]): Promise<void> {
       const status = (alive ? 'online' : s.pid ? 'stopped' : 'idle').padEnd(cols.status);
       parts.push(title, dir, pid, uptime, status);
 
-      const tmuxName = `bmx-${s.sessionId.substring(0, 8)}`;
+      const tmuxName = `bbg-${s.sessionId.substring(0, 8)}`;
       const hasTmux = tmuxSessionExists(tmuxName);
       return { session: s, text: parts.join(' │ '), alive, tmuxName, hasTmux };
     });
@@ -854,7 +853,7 @@ function interactiveSessionPicker(active: SessionData[]): Promise<void> {
   function render(): void {
     process.stdout.write('\x1b[H\x1b[J');
 
-    process.stdout.write(`\x1b[1m botmux sessions\x1b[0m  \x1b[2m(${rows.length})\x1b[0m\n\n`);
+    process.stdout.write(`\x1b[1m botbridge sessions\x1b[0m  \x1b[2m(${rows.length})\x1b[0m\n\n`);
 
     // Header + separator — use same 4-char prefix as rows
     process.stdout.write(`    ${separator}\n`);
@@ -1023,7 +1022,7 @@ async function cmdList(): Promise<void> {
   const live: SessionData[] = [];
   for (const s of active) {
     const hasPid = !!(s.pid && isProcessAlive(s.pid));
-    const hasTmux = tmuxSessionExists(`bmx-${s.sessionId.substring(0, 8)}`);
+    const hasTmux = tmuxSessionExists(`bbg-${s.sessionId.substring(0, 8)}`);
     if (!hasPid && !hasTmux) {
       pruned.push(s);
     } else {
@@ -1060,7 +1059,7 @@ async function cmdList(): Promise<void> {
 function cmdDelete(): void {
   const target = process.argv[3];
   if (!target) {
-    console.error('用法: botmux delete <session-id|all>');
+    console.error('用法: botbridge delete <session-id|all>');
     process.exit(1);
   }
 
@@ -1079,7 +1078,7 @@ function cmdDelete(): void {
   } else if (target === 'stopped') {
     toDelete = active.filter(s => {
       const hasPid = !!(s.pid && isProcessAlive(s.pid));
-      const hasTmux = tmuxSessionExists(`bmx-${s.sessionId.substring(0, 8)}`);
+      const hasTmux = tmuxSessionExists(`bbg-${s.sessionId.substring(0, 8)}`);
       return !hasPid && !hasTmux;
     });
     if (toDelete.length === 0) {
@@ -1091,7 +1090,7 @@ function cmdDelete(): void {
     toDelete = active.filter(s => s.sessionId.startsWith(target));
     if (toDelete.length === 0) {
       console.error(`❌ 未找到匹配 "${target}" 的活跃会话`);
-      console.error('   使用 botmux list 查看所有会话');
+      console.error('   使用 botbridge list 查看所有会话');
       process.exit(1);
     }
     if (toDelete.length > 1) {
@@ -1111,7 +1110,7 @@ function cmdDelete(): void {
     }
 
     // Kill associated tmux session if it exists
-    const tmuxName = `bmx-${s.sessionId.substring(0, 8)}`;
+    const tmuxName = `bbg-${s.sessionId.substring(0, 8)}`;
     try {
       execSync(`tmux kill-session -t '${tmuxName}' 2>/dev/null`, { stdio: 'ignore' });
       console.log(`  killed tmux ${tmuxName}`);
@@ -1128,7 +1127,7 @@ function cmdDelete(): void {
 
 function showHelp(): void {
   console.log(`
-botmux v${getVersion()} — IM ↔ AI 编程 CLI 桥接
+botbridge v${getVersion()} — IM ↔ AI 编程 CLI 桥接
 
 命令:
   setup       交互式配置（首次使用 / 添加机器人）
@@ -1159,15 +1158,15 @@ botmux v${getVersion()} — IM ↔ AI 编程 CLI 桥接
   bots list                            列出当前群聊中的机器人（含 open_id）
   thread messages [--limit N]          拉取当前话题的消息历史 (JSON)
 
-配置目录: ~/.botmux/
-文档: https://github.com/deepcoldy/botmux
+配置目录: ~/.botbridge/
+文档: https://github.com/deepcoldy/botbridge
 `);
 }
 
 // ─── Schedule subcommands ────────────────────────────────────────────────────
 
 /**
- * Walk the process tree looking for a CLI-pid marker written by the botmux
+ * Walk the process tree looking for a CLI-pid marker written by the botbridge
  * worker. Returns the sessionId stored in the marker (or '' if empty/legacy).
  *
  * This mirrors server.ts:findAncestorCliMarker but is local to cli.ts so
@@ -1176,7 +1175,7 @@ botmux v${getVersion()} — IM ↔ AI 编程 CLI 桥接
  */
 function findAncestorSessionId(): string | null {
   const dataDir = resolveDataDir();
-  const markersDir = join(dataDir, '.botmux-cli-pids');
+  const markersDir = join(dataDir, '.botbridge-cli-pids');
   if (!existsSync(markersDir)) return null;
 
   let pid = process.ppid;
@@ -1232,10 +1231,6 @@ function argValue(args: string[], ...flags: string[]): string | undefined {
   return undefined;
 }
 
-function argFlag(args: string[], flag: string): boolean {
-  return args.includes(flag);
-}
-
 /** Extract positional args, skipping --flag and the value that follows it
  *  (for --flag <value> style).  --flag=value style is self-contained. */
 function positionals(args: string[]): string[] {
@@ -1262,7 +1257,7 @@ async function cmdSchedule(sub: string, rest: string[]): Promise<void> {
   if (!sub || sub === 'list' || sub === 'ls') {
     const tasks = scheduleStore.listTasks();
     if (tasks.length === 0) {
-      console.log('暂无定时任务。\n\n用法:\n  botmux schedule add "每日17:50" "帮我看AI新闻"\n  botmux schedule add "every 2h" "检查构建"\n  botmux schedule add "0 9 * * *" "每天早安"');
+      console.log('暂无定时任务。\n\n用法:\n  botbridge schedule add "每日17:50" "帮我看AI新闻"\n  botbridge schedule add "every 2h" "检查构建"\n  botbridge schedule add "0 9 * * *" "每天早安"');
       return;
     }
     const filter = argValue(rest, '--chat-id');
@@ -1288,13 +1283,13 @@ async function cmdSchedule(sub: string, rest: string[]): Promise<void> {
   if (sub === 'add') {
     const [rawSchedule, ...promptParts] = positionals(rest);
     if (!rawSchedule) {
-      console.error('用法: botmux schedule add <schedule> <prompt> [--name NAME] [--chat-id CHAT] [--root-msg-id ROOT] [--lark-app-id APP] [--workdir DIR]');
+      console.error('用法: botbridge schedule add <schedule> <prompt> [--name NAME] [--chat-id CHAT] [--root-msg-id ROOT] [--lark-app-id APP] [--workdir DIR]');
       process.exit(1);
     }
     // prompt may come from positional or --prompt flag
     const promptArg = argValue(rest, '--prompt') ?? promptParts.join(' ');
     if (!promptArg) {
-      console.error('缺少 prompt。用法: botmux schedule add <schedule> <prompt>');
+      console.error('缺少 prompt。用法: botbridge schedule add <schedule> <prompt>');
       process.exit(1);
     }
 
@@ -1342,7 +1337,7 @@ async function cmdSchedule(sub: string, rest: string[]): Promise<void> {
 
   const id = positionals(rest)[0];
   if (!id) {
-    console.error(`用法: botmux schedule ${sub} <id>`);
+    console.error(`用法: botbridge schedule ${sub} <id>`);
     process.exit(1);
   }
 
@@ -1480,7 +1475,7 @@ async function cmdSend(rest: string[]): Promise<void> {
   }
 
   if (!content.trim() && images.length === 0 && files.length === 0) {
-    console.error('没有内容可发送。用法:\n  echo "消息" | botmux send\n  botmux send "消息"\n  botmux send --content-file /tmp/msg.md --images /tmp/chart.png');
+    console.error('没有内容可发送。用法:\n  echo "消息" | botbridge send\n  botbridge send "消息"\n  botbridge send --content-file /tmp/msg.md --images /tmp/chart.png');
     process.exit(1);
   }
 
@@ -1647,7 +1642,7 @@ async function cmdBots(sub: string, rest: string[]): Promise<void> {
   process.env.SESSION_DATA_DIR ??= resolveDataDir();
 
   if (sub !== 'list' && sub !== 'ls' && sub !== '') {
-    console.error('用法: botmux bots list [--session-id ID]');
+    console.error('用法: botbridge bots list [--session-id ID]');
     process.exit(1);
   }
 
@@ -1730,7 +1725,7 @@ switch (command) {
   case 'thread':   {
     const sub = process.argv[3] ?? '';
     if (sub === 'messages' || sub === 'msgs') await cmdThreadMessages(process.argv.slice(4));
-    else { console.error(`用法: botmux thread messages [--limit N] [--session-id ID]`); process.exit(1); }
+    else { console.error(`用法: botbridge thread messages [--limit N] [--session-id ID]`); process.exit(1); }
     break;
   }
   default:        showHelp(); break;

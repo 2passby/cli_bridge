@@ -1,6 +1,6 @@
-# botmux
+# botbridge
 
-飞书话题群 ↔ AI 编程 CLI 桥接。Daemon 监听飞书消息，每个新话题自动 spawn 一个独立 CLI 进程（Claude Code / Codex / Gemini / OpenCode）。
+飞书话题群 ↔ AI 编程 CLI 桥接。npm 包名为 `botbridge`，当前 CLI 命令仍为 `botbridge`。Daemon 监听飞书消息，每个新话题自动 spawn 一个独立 CLI 进程（Claude Code / Codex / Gemini / OpenCode）。
 
 ## 构建 & 运行
 
@@ -20,7 +20,7 @@ pnpm daemon:logs          # 查看日志
 - `bot-registry.ts` — 多机器人配置加载 + 状态管理
 - `config.ts` — 全局配置
 - `adapters/cli/` — CLI 适配器（参数构建、输入写入、Skill 目录），每种 CLI 一个文件
-- `skills/` — 开箱即用的 Skill 定义（`botmux-send`/`botmux-schedule`/`botmux-bots`/`botmux-thread-messages`）+ installer
+- `skills/` — 开箱即用的 Skill 定义（`botbridge-send`/`botbridge-schedule`/`botbridge-bots`/`botbridge-thread-messages`）+ installer
 - `adapters/backend/` — 会话后端：`PtyBackend`、`TmuxBackend`
 - `core/types.ts` — `DaemonSession` 是核心类型，所有模块从此导入
 - `core/` — `worker-pool`、`command-handler`、`session-manager`、`cost-calculator`、`scheduler`

@@ -1,10 +1,10 @@
-# Contributing to botmux
+# Contributing to botbridge
 
 ## Development Setup
 
 ```bash
-git clone https://github.com/deepcoldy/botmux.git
-cd botmux
+git clone https://github.com/deepcoldy/botbridge.git
+cd botbridge
 pnpm install
 pnpm build
 
@@ -41,7 +41,7 @@ Worker (worker.ts) -- forked per session
     |
 AI Coding CLI (interactive TTY)
     |-- Auto-installed Skills (~/.claude/skills/, ~/.gemini/skills/, ~/.config/opencode/skills/)
-    |-- ~/.botmux/bin/botmux wrapper on PATH → `botmux send/schedule/bots/thread` subcommands
+    |-- ~/.botbridge/bin/botbridge wrapper on PATH → `botbridge send/schedule/bots/thread` subcommands
     |
 Lark API
     |-- Replies, reactions, card updates, DMs
@@ -84,7 +84,7 @@ src/
       card-builder.ts       # Lark interactive card builders
       message-parser.ts     # Lark event message parsing
   skills/
-    definitions.ts          # Built-in Skill markdown (botmux-send/schedule/bots/thread-messages)
+    definitions.ts          # Built-in Skill markdown (botbridge-send/schedule/bots/thread-messages)
     installer.ts            # Syncs skills into each CLI's native skills dir
   services/
     session-store.ts        # Session persistence (JSON)
@@ -99,9 +99,9 @@ src/
 
 ## CLI-Agent Interaction (Skills + CLI subcommands)
 
-botmux previously exposed its Lark-interaction capabilities as MCP tools.
-As of April 2026, everything has been migrated to **CLI subcommands** (`botmux send`,
-`botmux schedule`, `botmux bots`, `botmux thread messages`) paired with
+botbridge previously exposed its Lark-interaction capabilities as MCP tools.
+As of April 2026, everything has been migrated to **CLI subcommands** (`botbridge send`,
+`botbridge schedule`, `botbridge bots`, `botbridge thread messages`) paired with
 auto-installed **Skills** that teach the agent when/how to use them.
 
 **Runtime setup per CLI worker spawn** (see `src/core/worker-pool.ts`):
@@ -109,17 +109,17 @@ auto-installed **Skills** that teach the agent when/how to use them.
 1. `ensureCliSkills(cliId)` — writes `src/skills/definitions.ts` content
    into the CLI's native skill dir (`~/.claude/skills/`, `~/.gemini/skills/`,
    `~/.config/opencode/skills/`). Synchronous, idempotent per lifecycle.
-2. `cleanupLegacyMcpConfig(cliId)` — best-effort removes the stale `botmux`
+2. `cleanupLegacyMcpConfig(cliId)` — best-effort removes the stale `botbridge`
    MCP entry from `~/.claude.json` / `~/.aiden/.mcp.json` /
-   `~/.config/opencode/opencode.json` / `<cli> mcp remove botmux`, so users
+   `~/.config/opencode/opencode.json` / `<cli> mcp remove botbridge`, so users
    upgrading from the pre-migration version don't see "MCP server failed" errors.
-3. Worker `PATH` is prepended with `~/.botmux/bin`, which contains a
-   `botmux` shell wrapper written by the daemon at startup (points at the
+3. Worker `PATH` is prepended with `~/.botbridge/bin`, which contains a
+   `botbridge` shell wrapper written by the daemon at startup (points at the
    running daemon's `dist/cli.js` — always in sync).
 4. `--append-system-prompt` flag injects the routing instruction
-   ("user reads Lark, not terminal — use `botmux send` for user-facing content")
+   ("user reads Lark, not terminal — use `botbridge send` for user-facing content")
    into each CLI session.
-5. Every user message carries a per-message hint (`[回复请用 botmux send]`)
+5. Every user message carries a per-message hint (`[回复请用 botbridge send]`)
    appended in `buildFollowUpContent` to keep the instruction near the attention
    window even in long conversations.
 
@@ -127,15 +127,15 @@ auto-installed **Skills** that teach the agent when/how to use them.
 
 | Subcommand | Description |
 |------------|-------------|
-| `botmux send [content]` | Send message to current thread (stdin / heredoc / `--content-file`; `--images` / `--files` / `--mention` flags) |
-| `botmux bots list` | List bots in current chat with their `open_id`s |
-| `botmux thread messages [--limit N]` | Fetch thread message history (JSON) |
-| `botmux schedule add <schedule> <prompt>` | Create scheduled task bound to current thread |
-| `botmux schedule list/remove/pause/resume/run` | Manage tasks |
+| `botbridge send [content]` | Send message to current thread (stdin / heredoc / `--content-file`; `--images` / `--files` / `--mention` flags) |
+| `botbridge bots list` | List bots in current chat with their `open_id`s |
+| `botbridge thread messages [--limit N]` | Fetch thread message history (JSON) |
+| `botbridge schedule add <schedule> <prompt>` | Create scheduled task bound to current thread |
+| `botbridge schedule list/remove/pause/resume/run` | Manage tasks |
 
 All agent-facing subcommands auto-detect session context by walking the
 process tree looking for a CLI-pid marker written by the worker
-(`{dataDir}/.botmux-cli-pids/{pid}`). No MCP needed — works across every
+(`{dataDir}/.botbridge-cli-pids/{pid}`). No MCP needed — works across every
 CLI that can spawn child processes.
 
 ## Adding a New CLI Adapter

@@ -1,7 +1,7 @@
 /**
  * Session Discovery — scans tmux panes for running CLI processes that can be adopted.
  *
- * Discovers non-botmux tmux sessions running known CLI binaries (Claude Code,
+ * Discovers non-botbridge tmux sessions running known CLI binaries (Claude Code,
  * Codex, Aiden, CoCo, Gemini, OpenCode) and collects metadata needed to adopt them.
  */
 import { execSync } from 'node:child_process';
@@ -151,9 +151,9 @@ function getPaneDimensions(tmuxTarget: string): { cols: number; rows: number } |
 // ─── Public API ──────────────────────────────────────────────────────────────
 
 /**
- * Scan all tmux panes for running CLI processes that can be adopted by Botmux.
+ * Scan all tmux panes for running CLI processes that can be adopted by Botbridge.
  *
- * Skips `bmx-*` prefixed sessions (already managed by Botmux).
+ * Skips `bbg-*` prefixed sessions (already managed by Botbridge).
  * For each remaining pane, recursively searches the process tree (up to 3 levels)
  * for known CLI binaries.
  *
@@ -185,9 +185,9 @@ export function discoverAdoptableSessions(filterCliId?: CliId): AdoptableSession
     const panePid = Number(line.slice(spaceIdx + 1));
     if (isNaN(panePid)) continue;
 
-    // 2. Filter out bmx-* sessions
+    // 2. Filter out bbg-* sessions
     const sessionName = tmuxTarget.split(':')[0];
-    if (sessionName?.startsWith('bmx-')) continue;
+    if (sessionName?.startsWith('bbg-')) continue;
 
     // 3. Recursively search process tree for known CLI binaries (up to 3 levels)
     const match = findCliProcess(panePid, 3);

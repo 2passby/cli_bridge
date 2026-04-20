@@ -37,7 +37,7 @@ import { createHash } from 'node:crypto';
 
 let cliAdapter: CliAdapter | null = null;
 let backend: SessionBackend | null = null;
-let cliPidMarker: string | null = null;  // path to .botmux-cli-pids/<pid>
+let cliPidMarker: string | null = null;  // path to .botbridge-cli-pids/<pid>
 let idleDetector: IdleDetector | null = null;
 let isTmuxMode = false;
 let httpServer: ReturnType<typeof createHttpServer> | null = null;
@@ -558,11 +558,11 @@ function spawnCli(cfg: Extract<DaemonToWorker, { type: 'init' }>): void {
     env: { ...process.env, CLAUDECODE: undefined } as unknown as Record<string, string>,
   });
 
-  // Write CLI PID marker so the MCP server can verify it was spawned by botmux.
+  // Write CLI PID marker so the MCP server can verify it was spawned by botbridge.
   // The MCP server checks if process.ppid has a marker in this directory.
   const cliPid = backend.getChildPid?.();
   if (cliPid && process.env.SESSION_DATA_DIR) {
-    const markersDir = join(process.env.SESSION_DATA_DIR, '.botmux-cli-pids');
+    const markersDir = join(process.env.SESSION_DATA_DIR, '.botbridge-cli-pids');
     try {
       mkdirSync(markersDir, { recursive: true });
       cliPidMarker = join(markersDir, String(cliPid));
@@ -652,7 +652,7 @@ function startWebServer(host: string, preferredPort?: number): Promise<number> {
         // ── Tmux mode: per-client attach ──
         // Each WS client gets its own `tmux attach-session` PTY.
         // Scrollback is handled natively by tmux (history-limit).
-        // In adopt mode, attach to the user's original pane; otherwise use bmx-* session.
+        // In adopt mode, attach to the user's original pane; otherwise use bbg-* session.
         const tmuxTarget = lastInitConfig?.adoptTmuxTarget ?? TmuxBackend.sessionName(sessionId);
         const cp = pty.spawn('tmux', ['attach-session', '-t', tmuxTarget], {
           name: 'xterm-256color',

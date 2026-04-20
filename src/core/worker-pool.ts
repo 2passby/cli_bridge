@@ -132,13 +132,13 @@ export function ensureCliSkills(cliId: CliId, cliPathOverride?: string): void {
 
 // ─── Legacy MCP config cleanup ──────────────────────────────────────────────
 //
-// botmux used to register itself as an MCP server in each CLI's config so the
+// botbridge used to register itself as an MCP server in each CLI's config so the
 // CLI could call send_to_thread / get_thread_messages / list_bots.  Those
-// tools have since been migrated to `botmux` subcommands + Skills.  The old
+// tools have since been migrated to `botbridge` subcommands + Skills.  The old
 // MCP entry is now dead — if we leave it, the CLI will try to spawn a
 // non-existent server on startup and users see scary errors.
 //
-// For each CLI, best-effort remove any `botmux` entry from its MCP config.
+// For each CLI, best-effort remove any `botbridge` entry from its MCP config.
 // Runs once per CLI per daemon lifecycle, same lifecycle as ensureCliSkills.
 
 /** Track which CLI adapters have had legacy MCP config cleaned this daemon lifecycle */
@@ -164,10 +164,10 @@ function removeJsonKey(configPath: string, pathSegments: string[], keyToRemove: 
   }
 }
 
-/** Try running `<cli> mcp remove botmux`. Returns true if the command ran. */
+/** Try running `<cli> mcp remove botbridge`. Returns true if the command ran. */
 function tryCliMcpRemove(binName: string): boolean {
   try {
-    execSync(`${binName} mcp remove botmux`, { stdio: 'ignore', timeout: 10_000 });
+    execSync(`${binName} mcp remove botbridge`, { stdio: 'ignore', timeout: 10_000 });
     return true;
   } catch {
     return false;
@@ -175,7 +175,7 @@ function tryCliMcpRemove(binName: string): boolean {
 }
 
 /**
- * Remove legacy `botmux` MCP server registration from the given CLI's config.
+ * Remove legacy `botbridge` MCP server registration from the given CLI's config.
  * Idempotent — runs once per CLI per daemon lifecycle.  Best-effort: any
  * failure is swallowed; we never want to block worker startup.
  */
@@ -187,29 +187,29 @@ export function cleanupLegacyMcpConfig(cliId: CliId): void {
     const home = homedir();
     switch (cliId) {
       case 'claude-code': {
-        // ~/.claude.json → { mcpServers: { botmux } }
-        if (removeJsonKey(join(home, '.claude.json'), ['mcpServers'], 'botmux')) {
-          logger.info(`[legacy-mcp] Removed botmux entry from ~/.claude.json`);
+        // ~/.claude.json → { mcpServers: { botbridge } }
+        if (removeJsonKey(join(home, '.claude.json'), ['mcpServers'], 'botbridge')) {
+          logger.info(`[legacy-mcp] Removed botbridge entry from ~/.claude.json`);
         }
         break;
       }
       case 'aiden': {
-        // ~/.aiden/.mcp.json or cwd/.mcp.json → { mcpServers: { botmux } }
+        // ~/.aiden/.mcp.json or cwd/.mcp.json → { mcpServers: { botbridge } }
         for (const p of [join(home, '.aiden', '.mcp.json'), join(process.cwd(), '.mcp.json')]) {
-          if (removeJsonKey(p, ['mcpServers'], 'botmux')) {
-            logger.info(`[legacy-mcp] Removed botmux entry from ${p}`);
+          if (removeJsonKey(p, ['mcpServers'], 'botbridge')) {
+            logger.info(`[legacy-mcp] Removed botbridge entry from ${p}`);
           }
         }
         break;
       }
       case 'opencode': {
-        // ~/.config/opencode/opencode.json → { mcp: { botmux } } or { mcpServers: { botmux } }
+        // ~/.config/opencode/opencode.json → { mcp: { botbridge } } or { mcpServers: { botbridge } }
         const p = join(home, '.config', 'opencode', 'opencode.json');
         const removed =
-          removeJsonKey(p, ['mcp'], 'botmux') ||
-          removeJsonKey(p, ['mcpServers'], 'botmux') ||
-          removeJsonKey(p, ['mcp', 'servers'], 'botmux');
-        if (removed) logger.info(`[legacy-mcp] Removed botmux entry from ${p}`);
+          removeJsonKey(p, ['mcp'], 'botbridge') ||
+          removeJsonKey(p, ['mcpServers'], 'botbridge') ||
+          removeJsonKey(p, ['mcp', 'servers'], 'botbridge');
+        if (removed) logger.info(`[legacy-mcp] Removed botbridge entry from ${p}`);
         break;
       }
       case 'coco':
@@ -218,7 +218,7 @@ export function cleanupLegacyMcpConfig(cliId: CliId): void {
         // These CLIs managed MCP via their own subcommand.  Skip silently if
         // the binary isn't on PATH — nothing to clean then.
         if (tryCliMcpRemove(cliId)) {
-          logger.info(`[legacy-mcp] Ran \`${cliId} mcp remove botmux\``);
+          logger.info(`[legacy-mcp] Ran \`${cliId} mcp remove botbridge\``);
         }
         break;
       }
@@ -276,19 +276,19 @@ export function forkWorker(ds: DaemonSession, prompt: string, resume = false): v
 
   ensureCliEnv(botCfg.cliId, botCfg.cliPathOverride);
 
-  // Prepend ~/.botmux/bin to PATH so CLIs can call `botmux send` etc.
+  // Prepend ~/.botbridge/bin to PATH so CLIs can call `botbridge send` etc.
   // The wrapper script there is written by the daemon at startup.
-  const botmuxBinDir = join(homedir(), '.botmux', 'bin');
-  const pathWithBotmux = `${botmuxBinDir}:${process.env.PATH ?? ''}`;
+  const botbridgeBinDir = join(homedir(), '.botbridge', 'bin');
+  const pathWithBotbridge = `${botbridgeBinDir}:${process.env.PATH ?? ''}`;
 
   const worker = fork(workerPath, [], {
     stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
     cwd,
     env: {
       ...process.env,
-      PATH: pathWithBotmux,
+      PATH: pathWithBotbridge,
       CLAUDECODE: undefined,
-      BOTMUX: '1',  // Inherited by CLI → MCP server for session detection
+      BOTBRIDGE: '1',  // Inherited by CLI → MCP server for session detection
       SESSION_DATA_DIR: config.session.dataDir,
       LARK_APP_ID: botCfg.larkAppId,
       LARK_APP_SECRET: botCfg.larkAppSecret,
@@ -735,7 +735,7 @@ export function forkAdoptWorker(ds: DaemonSession): void {
     env: {
       ...process.env,
       CLAUDECODE: undefined,
-      BOTMUX: '1',
+      BOTBRIDGE: '1',
       LARK_APP_ID: botCfg.larkAppId,
       LARK_APP_SECRET: botCfg.larkAppSecret,
     },
@@ -820,7 +820,7 @@ export function killStalePids(activeSessions_: Session[]): void {
     if (!multiBot && lastCliId && lastCliId !== currentCliId) {
       // Single-bot mode: CLI_ID changed since last run, kill ALL tmux sessions
       logger.info(`CLI_ID changed (${lastCliId} → ${currentCliId}), killing all tmux sessions`);
-      for (const name of TmuxBackend.listBotmuxSessions()) {
+      for (const name of TmuxBackend.listBotbridgeSessions()) {
         TmuxBackend.killSession(name);
       }
     } else {
@@ -833,7 +833,7 @@ export function killStalePids(activeSessions_: Session[]): void {
       const ownedNames = new Set(
         sessionStore.listSessions().map(s => TmuxBackend.sessionName(s.sessionId)),
       );
-      for (const name of TmuxBackend.listBotmuxSessions()) {
+      for (const name of TmuxBackend.listBotbridgeSessions()) {
         if (ownedNames.has(name) && !activeNames.has(name)) {
           logger.info(`Killing orphaned tmux session: ${name}`);
           TmuxBackend.killSession(name);

@@ -11,7 +11,7 @@ import type { SessionBackend, SpawnOpts } from './types.js';
  *   - kill() only detaches (kills the pty viewer), tmux session survives
  *   - destroySession() kills the tmux session (for explicit /close)
  *
- * Naming: tmux sessions are named `bmx-<sessionId.slice(0,8)>`.
+ * Naming: tmux sessions are named `bbg-<sessionId.slice(0,8)>`.
  */
 export class TmuxBackend implements SessionBackend {
   private process: pty.IPty | null = null;
@@ -38,7 +38,7 @@ export class TmuxBackend implements SessionBackend {
 
   /** Derive tmux session name from a session UUID. */
   static sessionName(sessionId: string): string {
-    return `bmx-${sessionId.slice(0, 8)}`;
+    return `bbg-${sessionId.slice(0, 8)}`;
   }
 
   /** Check if a named tmux session exists. */
@@ -58,13 +58,13 @@ export class TmuxBackend implements SessionBackend {
     } catch { /* session doesn't exist */ }
   }
 
-  /** List all botmux tmux sessions (bmx-* prefix). */
-  static listBotmuxSessions(): string[] {
+  /** List all botbridge tmux sessions (bbg-* prefix). */
+  static listBotbridgeSessions(): string[] {
     try {
       const out = execSync("tmux list-sessions -F '#{session_name}' 2>/dev/null", {
         encoding: 'utf-8',
       });
-      return out.split('\n').filter(s => s.startsWith('bmx-'));
+      return out.split('\n').filter(s => s.startsWith('bbg-'));
     } catch {
       return [];
     }
@@ -263,8 +263,8 @@ export class TmuxBackend implements SessionBackend {
   }
 
   /**
-   * Attach to an existing user tmux pane (not a bmx-* session).
-   * Used by adopt mode — Botmux observes an already-running CLI.
+   * Attach to an existing user tmux pane (not a bbg-* session).
+   * Used by adopt mode — Botbridge observes an already-running CLI.
    *
    * Zooms the target pane so only it is visible (hides other panes in the window).
    * The zoom is undone when the backend is killed (detach/disconnect).
@@ -306,7 +306,7 @@ export class TmuxBackend implements SessionBackend {
  * for non-first bots without explicit passthrough.
  */
 const TMUX_PASSTHROUGH_VARS = [
-  'BOTMUX',
+  'BOTBRIDGE',
   'LARK_APP_ID',
   'LARK_APP_SECRET',
   '__OWNER_OPEN_ID',

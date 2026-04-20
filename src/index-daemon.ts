@@ -6,7 +6,7 @@ import { existsSync } from 'node:fs';
 
 // Legacy: load .env for global settings (WEB_HOST, WEB_EXTERNAL_HOST, etc.)
 // Bot config now lives in bots.json; this is kept for backward compatibility.
-const globalEnv = join(homedir(), '.botmux', '.env');
+const globalEnv = join(homedir(), '.botbridge', '.env');
 dotenvConfig({ path: existsSync(globalEnv) ? globalEnv : '.env' });
 
 async function main() {
@@ -14,10 +14,10 @@ async function main() {
   const { startDaemon } = await import('./daemon.js');
   const { logger } = await import('./utils/logger.js');
 
-  const botIndexStr = process.env.BOTMUX_BOT_INDEX;
+  const botIndexStr = process.env.BOTBRIDGE_BOT_INDEX;
   const botIndex = botIndexStr !== undefined ? parseInt(botIndexStr, 10) : undefined;
 
-  logger.info(`Starting botmux daemon...${botIndex !== undefined ? ` (bot index: ${botIndex})` : ''}`);
+  logger.info(`Starting botbridge daemon...${botIndex !== undefined ? ` (bot index: ${botIndex})` : ''}`);
   await startDaemon(botIndex);
 }
 

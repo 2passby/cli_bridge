@@ -75,7 +75,7 @@ export function getAllBots(): BotState[] {
 /**
  * Load bot configurations from one of (in priority order):
  * 1. BOTS_CONFIG env var — path to a JSON file
- * 2. ~/.botmux/bots.json — default config path
+ * 2. ~/.botbridge/bots.json — default config path
  */
 export function loadBotConfigs(): BotConfig[] {
   // 1. BOTS_CONFIG env var
@@ -88,14 +88,14 @@ export function loadBotConfigs(): BotConfig[] {
     return parseBotConfigFile(resolved);
   }
 
-  // 2. ~/.botmux/bots.json
-  const defaultPath = resolve(homedir(), '.botmux', 'bots.json');
+  // 2. ~/.botbridge/bots.json
+  const defaultPath = resolve(homedir(), '.botbridge', 'bots.json');
   if (existsSync(defaultPath)) {
     return parseBotConfigFile(defaultPath);
   }
 
   throw new Error(
-    'No bot configuration found. Set BOTS_CONFIG or create ~/.botmux/bots.json.\nSee README for config format.'
+    'No bot configuration found. Set BOTS_CONFIG or create ~/.botbridge/bots.json.\nSee README for config format.'
   );
 }
 

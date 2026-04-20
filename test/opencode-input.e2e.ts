@@ -308,7 +308,7 @@ describe('OpenCode first input submission', () => {
   it('adapter: MCP config written to ~/.config/opencode/opencode.json', () => {
     /**
      * Verifies MCP config format matches OpenCode's expected structure:
-     * { "mcp": { "botmux": { "type": "local", "command": [...], "environment": {...} } } }
+     * { "mcp": { "botbridge": { "type": "local", "command": [...], "environment": {...} } } }
      */
     const { existsSync, readFileSync, mkdirSync, writeFileSync, unlinkSync } = require('node:fs');
     const { join } = require('node:path');
@@ -327,7 +327,7 @@ describe('OpenCode first input submission', () => {
     try {
       const adapter = createOpenCodeAdapter();
       adapter.ensureMcpConfig({
-        name: 'botmux',
+        name: 'botbridge',
         command: 'node',
         args: ['/tmp/test-server.js'],
         env: { SESSION_DATA_DIR: '/tmp/sessions' },
@@ -336,17 +336,17 @@ describe('OpenCode first input submission', () => {
       expect(existsSync(configPath)).toBe(true);
       const data = JSON.parse(readFileSync(configPath, 'utf-8'));
       expect(data.mcp).toBeDefined();
-      expect(data.mcp.botmux).toBeDefined();
-      expect(data.mcp.botmux.type).toBe('local');
-      expect(data.mcp.botmux.command).toEqual(['node', '/tmp/test-server.js']);
-      expect(data.mcp.botmux.environment).toEqual({ SESSION_DATA_DIR: '/tmp/sessions' });
+      expect(data.mcp.botbridge).toBeDefined();
+      expect(data.mcp.botbridge.type).toBe('local');
+      expect(data.mcp.botbridge.command).toEqual(['node', '/tmp/test-server.js']);
+      expect(data.mcp.botbridge.environment).toEqual({ SESSION_DATA_DIR: '/tmp/sessions' });
 
       // Verify idempotency — second call should be a no-op
       const mtime1 = require('node:fs').statSync(configPath).mtimeMs;
       // Small delay to ensure mtime would differ if file were rewritten
       const start = Date.now(); while (Date.now() - start < 50) { /* spin */ }
       adapter.ensureMcpConfig({
-        name: 'botmux',
+        name: 'botbridge',
         command: 'node',
         args: ['/tmp/test-server.js'],
         env: { SESSION_DATA_DIR: '/tmp/sessions' },

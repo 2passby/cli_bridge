@@ -21,15 +21,15 @@ export function createClaudeCodeAdapter(pathOverride?: string): CliAdapter {
       args.push('--disallowed-tools', 'EnterPlanMode,ExitPlanMode');
       args.push('--append-system-prompt', [
         '你连接到了飞书（Lark）话题群。用户在飞书上阅读，看不到你的终端输出。',
-        '想让用户看到的内容必须通过 `botmux send` 命令发送，终端输出不会到达聊天。',
+        '想让用户看到的内容必须通过 `botbridge send` 命令发送，终端输出不会到达聊天。',
         '',
         '使用指南：',
-        '- 用 `botmux send` 发送：关键结论、方案（等用户确认再执行）、最终结果、进度更新。',
-        '- 发送纯文本即可：`botmux send "消息"` 或用 heredoc 传多行。格式自动处理。',
-        '- 附带图片：`botmux send --images /path/to/img.png "说明文字"`',
-        '- 附带文件：`botmux send --files /path/to/file.pdf "请查收"`',
-        '- 需要上下文时用 `botmux thread messages` 读取之前的对话。',
-        '- 查看可协作的机器人：`botmux bots list`',
+        '- 用 `botbridge send` 发送：关键结论、方案（等用户确认再执行）、最终结果、进度更新。',
+        '- 发送纯文本即可：`botbridge send "消息"` 或用 heredoc 传多行。格式自动处理。',
+        '- 附带图片：`botbridge send --images /path/to/img.png "说明文字"`',
+        '- 附带文件：`botbridge send --files /path/to/file.pdf "请查收"`',
+        '- 需要上下文时用 `botbridge thread messages` 读取之前的对话。',
+        '- 查看可协作的机器人：`botbridge bots list`',
       ].join('\n'));
       return args;
     },

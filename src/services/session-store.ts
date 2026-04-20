@@ -109,7 +109,7 @@ export function getSession(sessionId: string): Session | undefined {
  * Search all session files for a session not found in the current file.
  *
  * The MCP server is a global singleton (one config in ~/.claude.json shared
- * by all CLI instances). It may be spawned from a non-botmux context where
+ * by all CLI instances). It may be spawned from a non-botbridge context where
  * LARK_APP_ID is unavailable, so it can't scope to the right per-bot file.
  * Scanning all files is safe here because MCP tools only read sessions.
  */

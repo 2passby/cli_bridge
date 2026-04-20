@@ -136,7 +136,7 @@ export async function handleCardAction(data: CardActionData, deps: CardHandlerDe
       const resumeSessionId = adopted.sessionId;
       const origCliId = adopted.cliId ?? 'claude-code';
 
-      // Clear adopt state, set up for standard botmux session
+      // Clear adopt state, set up for standard botbridge session
       const originalSessionId = adopted.sessionId;
       const originalCwd = adopted.cwd;
       ds.adoptedFrom = undefined;
@@ -171,7 +171,7 @@ export async function handleCardAction(data: CardActionData, deps: CardHandlerDe
       ds.currentImageKey = undefined;
       sessionStore.updateSession(ds.session);
 
-      // Fork standard Botmux worker with resume — BEFORE killing original CLI,
+      // Fork standard Botbridge worker with resume — BEFORE killing original CLI,
       // so the new worker reads the session file while it's still intact.
       forkWorker(ds, '', true);
 
@@ -192,7 +192,7 @@ export async function handleCardAction(data: CardActionData, deps: CardHandlerDe
           const esc = (s: string) => `'${s.replace(/'/g, "'\\''")}'`;
           execSync(`tmux send-keys -t ${esc(paneTarget)} C-c`, { stdio: 'ignore', timeout: 2000 });
           const notice = [
-            `printf '\\n\\033[1;33m⚠️  此会话已被 botmux 接管\\033[0m\\n`,
+            `printf '\\n\\033[1;33m⚠️  此会话已被 botbridge 接管\\033[0m\\n`,
             `session: ${resumeSessionId}\\n`,
             `\\n`,
             `如需恢复本地操作：\\n`,
@@ -205,7 +205,7 @@ export async function handleCardAction(data: CardActionData, deps: CardHandlerDe
       }, 1500);
 
       await sessionReply(rootId, '🔄 已接管会话，MCP 已启用');
-      logger.info(`[${tag(ds)}] Takeover: resumed session ${originalSessionId} as standard botmux session`);
+      logger.info(`[${tag(ds)}] Takeover: resumed session ${originalSessionId} as standard botbridge session`);
     }
 
     if (actionType === 'tui_keys' && ds) {

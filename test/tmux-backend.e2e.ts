@@ -13,7 +13,7 @@
 import { describe, it, expect, afterEach, beforeEach } from 'vitest';
 import { TmuxBackend } from '../src/adapters/backend/tmux-backend.js';
 
-const TEST_SESSION = 'bmx-test0001';
+const TEST_SESSION = 'bbg-test0001';
 const TEST_TIMEOUT = 15_000;
 
 describe('TmuxBackend', () => {
@@ -112,7 +112,7 @@ describe('TmuxBackend', () => {
     expect(TmuxBackend.hasSession(TEST_SESSION)).toBe(false);
   }, TEST_TIMEOUT);
 
-  it.skipIf(!TmuxBackend.isAvailable())('listBotmuxSessions returns bmx- sessions', () => {
+  it.skipIf(!TmuxBackend.isAvailable())('listBotbridgeSessions returns bbg- sessions', () => {
     const backend = new TmuxBackend(TEST_SESSION);
     backend.spawn('/bin/bash', ['-c', 'sleep 60'], {
       cwd: '/tmp',
@@ -121,7 +121,7 @@ describe('TmuxBackend', () => {
       env: { ...process.env } as Record<string, string>,
     });
 
-    const sessions = TmuxBackend.listBotmuxSessions();
+    const sessions = TmuxBackend.listBotbridgeSessions();
     expect(sessions).toContain(TEST_SESSION);
 
     backend.destroySession();

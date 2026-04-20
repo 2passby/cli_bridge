@@ -198,7 +198,7 @@ export function buildNewTopicPrompt(
       );
       botSection = `\n\n当前群聊中的其他机器人：\n${botLines.join(
         "\n"
-      )}\n可通过 botmux send --mention 参数 @mention 它们协作，也可用 botmux bots list 查询。`;
+      )}\n可通过 botbridge send --mention 参数 @mention 它们协作，也可用 botbridge bots list 查询。`;
     }
   }
 
@@ -271,14 +271,14 @@ export function buildFollowUpContent(
 
   // Per-message routing hint — only for CLIs without system prompt context.
   // CLIs with injectsSessionContext (e.g. Claude Code) already have the
-  // "use botmux send" instruction in --append-system-prompt, no need to repeat.
+  // "use botbridge send" instruction in --append-system-prompt, no need to repeat.
   const skipHint = opts?.cliId
     ? createCliAdapterSync(opts.cliId, opts.cliPathOverride)
         .injectsSessionContext
     : false;
   if (!skipHint) {
     parts.push(
-      "[回复请用 cli指令botmux send --session-id <id>，终端输出用户看不到]"
+      "[回复请用 cli指令botbridge send --session-id <id>，终端输出用户看不到]"
     );
   }
 

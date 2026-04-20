@@ -42,7 +42,7 @@
   <rect width="1200" height="600" fill="url(#grid)"/>
 
   <!-- Titles -->
-  <text x="600" y="90" class="title">botmux</text>
+  <text x="600" y="90" class="title">botbridge</text>
   <text x="600" y="130" class="subtitle">Bridge Feishu to AI Programming CLIs</text>
 
   <!-- Connecting Lines -->
@@ -68,7 +68,7 @@
       <path d="M -30 0 L 30 0 M -15 -15 L 0 -30 L 15 -15 M -15 15 L 0 30 L 15 15" fill="none" stroke="#a855f7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
     </g>
     
-    <text x="0" y="30" class="title" style="font-size: 28px;">botmux</text>
+    <text x="0" y="30" class="title" style="font-size: 28px;">botbridge</text>
     <text x="0" y="55" class="subtitle" style="font-size: 13px; letter-spacing: 2px;">DAEMON</text>
   </g>
 

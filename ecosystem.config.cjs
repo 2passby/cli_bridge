@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'botmux',
+      name: 'botbridge',
       script: 'dist/index-daemon.js',
       cwd: __dirname,
       autorestart: true,

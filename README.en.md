@@ -1,14 +1,14 @@
-# botmux
+# botbridge
 
 <p align="center">
-  <img src="cover.svg" alt="botmux cover" width="800">
+  <img src="cover.svg" alt="botbridge cover" width="800">
 </p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License MIT"></a>
   <img src="https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg" alt="Node.js >= 20">
-  <a href="https://www.npmjs.com/package/botmux"><img src="https://img.shields.io/npm/v/botmux.svg" alt="npm version"></a>
-  <a href="https://github.com/deepcoldy/botmux"><img src="https://img.shields.io/github/stars/deepcoldy/botmux?style=social" alt="GitHub Stars"></a>
+  <a href="https://www.npmjs.com/package/botbridge"><img src="https://img.shields.io/npm/v/botbridge.svg" alt="npm version"></a>
+  <a href="https://github.com/deepcoldy/botbridge"><img src="https://img.shields.io/github/stars/deepcoldy/botbridge?style=social" alt="GitHub Stars"></a>
 </p>
 
 <p align="center">
@@ -35,17 +35,17 @@
 
 ---
 
-## Why botmux?
+## Why botbridge?
 
 ### Design Philosophy
 
-Core philosophy: **Bridge CLIs, don't rebuild them**. botmux doesn't reimplement Agent capabilities — it bridges existing AI coding CLIs (Claude Code, Codex, Gemini, OpenCode) directly. Memory, context management, tool use, permission systems — these capabilities are evolving rapidly within the CLIs themselves. botmux rides on top of that evolution rather than rebuilding in parallel. Every CLI upgrade benefits botmux automatically with zero adaptation.
+Core philosophy: **Bridge CLIs, don't rebuild them**. botbridge doesn't reimplement Agent capabilities — it bridges existing AI coding CLIs (Claude Code, Codex, Gemini, OpenCode) directly. Memory, context management, tool use, permission systems — these capabilities are evolving rapidly within the CLIs themselves. botbridge rides on top of that evolution rather than rebuilding in parallel. Every CLI upgrade benefits botbridge automatically with zero adaptation.
 
 ### Key Advantages
 
 Compared to OpenClaw-style approaches built on Agent SDKs:
 
-| Feature | botmux | OpenClaw-style |
+| Feature | botbridge | OpenClaw-style |
 |---------|--------|---------------|
 | Architecture | Bridges full CLI processes directly | Rebuilds on Agent SDK |
 | CLI Capabilities | Full runtime (hooks, memory, plan mode, MCP ecosystem, `/` commands) | SDK API subset, missing features must be reimplemented |
@@ -55,7 +55,7 @@ Compared to OpenClaw-style approaches built on Agent SDKs:
 | Web Terminal | Interactive full terminal, mobile shortcut toolbar, phone/desktop/Lark tri-screen sync | Usually web chat UI or read-only output |
 | Multi-Bot Collaboration | Multiple bots in same group via @mention routing, isolated processes, different CLIs sparring | Usually single bot |
 | Terminal Access | tmux attach directly into the CLI process, same as local dev experience | No direct terminal access |
-| Installation | `npm install -g botmux`, 5-min Lark setup | Easy to install, but more configuration needed |
+| Installation | `npm install -g botbridge`, 5-min Lark setup | Easy to install, but more configuration needed |
 
 ---
 
@@ -113,24 +113,24 @@ Go to "Permissions & Scopes" → "Batch Import/Export", and paste the following 
 ```
 </details>
 
-### Step 4: Install & Start botmux
+### Step 4: Install & Start
 
 ```bash
-# Install
-npm install -g botmux
+# Install from npm (`botbridge` package, `botbridge` CLI command)
+npm install -g botbridge
 
 # Interactive setup — enter the App ID and App Secret from Step 2
-botmux setup
+botbridge setup
 
 # Start (must be running before configuring WebSocket subscription — Lark checks for an active connection)
-botmux start
+botbridge start
 ```
 
 ### Step 5: Configure Event Subscription
 
 Back in the Lark Open Platform, go to "Events & Callbacks":
 
-1. **Subscription mode**: Click the edit icon, select "Receive events via persistent connection" (WebSocket) — requires botmux to be running so Lark can detect the connection
+1. **Subscription mode**: Click the edit icon, select "Receive events via persistent connection" (WebSocket) — requires botbridge to be running so Lark can detect the connection
 
 ![WebSocket subscription](docs/setup/event-websocket.png)
 
@@ -182,37 +182,37 @@ Run multiple Lark bots on a single machine, each mapped to a different CLI. In t
 
 ### Tmux Persistence
 
-When tmux is installed, botmux automatically uses it. CLI processes persist inside tmux sessions — all features work unchanged.
+When tmux is installed, botbridge automatically uses it. CLI processes persist inside tmux sessions — all features work unchanged.
 
-**Key benefit: daemon restarts don't interrupt the CLI.** During `botmux restart`, the worker process exits but the tmux session (and the CLI inside it) keeps running. The next incoming message triggers a re-attach — no `--resume` context reload needed.
+**Key benefit: daemon restarts don't interrupt the CLI.** During `botbridge restart`, the worker process exits but the tmux session (and the CLI inside it) keeps running. The next incoming message triggers a re-attach — no `--resume` context reload needed.
 
 ```bash
 # Recommended: interactive session picker — select and attach to tmux
-npx botmux list
+npx botbridge list
 
-# Or manually attach (session name = bmx-<first 8 chars of session ID>)
-tmux attach -t bmx-<first-8-chars-of-session-id>
+# Or manually attach (session name = bbg-<first 8 chars of session ID>)
+tmux attach -t bbg-<first-8-chars-of-session-id>
 # Ctrl+B, D to detach — CLI keeps running
 
 # Force pure pty mode (disable tmux)
-BACKEND_TYPE=pty botmux start
+BACKEND_TYPE=pty botbridge start
 ```
 
-`botmux list` provides an interactive TUI showing all active sessions with ID, title, working directory, PID, uptime, and status. Use arrow keys to select and Enter to attach. Use `botmux list --plain` for plain-text table output suitable for scripting.
+`botbridge list` provides an interactive TUI showing all active sessions with ID, title, working directory, PID, uptime, and status. Use arrow keys to select and Enter to attach. Use `botbridge list --plain` for plain-text table output suitable for scripting.
 
-**Session naming:** `bmx-<first 8 chars of session UUID>`
+**Session naming:** `bbg-<first 8 chars of session UUID>`
 
 **Lifecycle:**
 
 | Event | tmux session | CLI process |
 |-------|-------------|-------------|
-| `botmux restart` | Survives | Survives (re-attaches on next message) |
+| `botbridge restart` | Survives | Survives (re-attaches on next message) |
 | `/close` or close button | Destroyed | Terminated (SIGHUP) |
 | CLI exits / crashes | Closes with it | Already exited (auto-restart creates new session) |
 
 ### Session Adopt
 
-Seamlessly connect Botmux to CLI processes already running in tmux — monitor and interact from your phone via Lark.
+Seamlessly connect Botbridge to CLI processes already running in tmux — monitor and interact from your phone via Lark.
 
 ```
 /adopt              # Scan tmux, show selection card
@@ -220,8 +220,8 @@ Seamlessly connect Botmux to CLI processes already running in tmux — monitor a
 ```
 
 - **Shared mode** — After adopting, iTerm2 and Lark stay in sync: streaming card shows real-time terminal output, Lark chat input is forwarded directly to the terminal
-- **One-click takeover** — Click the "Takeover" button on the streaming card to rebuild the session with `--resume` and convert to a standard Botmux session
-- **Safe disconnect** — Click "Disconnect" to detach Botmux without affecting the original CLI
+- **One-click takeover** — Click the "Takeover" button on the streaming card to rebuild the session with `--resume` and convert to a standard Botbridge session
+- **Safe disconnect** — Click "Disconnect" to detach Botbridge without affecting the original CLI
 
 ### Scheduled Tasks
 
@@ -230,7 +230,7 @@ language, executed inside the original thread (no new topic per run).
 
 **Two ways to create**:
 - **Slash command** (quick): `/schedule 每日17:50 check AI news`
-- **Conversation** (flexible): just tell the agent "add a reminder for every day at 9:00 to check deploys" — the `botmux-schedule` Skill fires automatically.
+- **Conversation** (flexible): just tell the agent "add a reminder for every day at 9:00 to check deploys" — the `botbridge-schedule` Skill fires automatically.
 
 Supported formats: Chinese NL (`每日17:50` / `30分钟后` / `明天9:00`),
 English duration (`30m`), interval (`every 2h`), cron (`0 9 * * *`),
@@ -238,13 +238,13 @@ ISO timestamp (`2026-05-01T10:00`).
 
 ### Lark integration (Skill + CLI)
 
-When a CLI spawns inside a botmux session it automatically gets
-`~/.botmux/bin` on PATH plus a set of ready-to-use Skills:
+When a CLI spawns inside a botbridge session it automatically gets
+`~/.botbridge/bin` on PATH plus a set of ready-to-use Skills:
 
-- `botmux send` — send a message to the current thread (text, images, files, @mention)
-- `botmux thread messages` — fetch thread history
-- `botmux bots list` — discover bots + their `open_id`s
-- `botmux schedule` — manage scheduled tasks
+- `botbridge send` — send a message to the current thread (text, images, files, @mention)
+- `botbridge thread messages` — fetch thread history
+- `botbridge bots list` — discover bots + their `open_id`s
+- `botbridge schedule` — manage scheduled tasks
 
 These capabilities are wired via `--append-system-prompt` and Skill
 descriptions, so the agent picks them up automatically. The pre-April-2026
@@ -262,7 +262,7 @@ MCP entry point has been removed (stale config is auto-cleaned on upgrade).
 4. A live streaming card appears in the thread, showing real-time terminal output with markdown rendering
 5. Each reply creates a new streaming card for that turn; previous cards freeze at their last state
 6. Click "Get Write Link" on the card to receive a write-enabled terminal URL via DM
-7. The CLI replies in the thread via the `botmux send` command (wired through the `botmux-send` Skill)
+7. The CLI replies in the thread via the `botbridge send` command (wired through the `botbridge-send` Skill)
 
 ### Slash Commands
 
@@ -284,7 +284,7 @@ MCP entry point has been removed (stale config is auto-cleaned on upgrade).
 ### Scheduled Task Management
 
 **Recommended: talk to the agent**
-Just say "add a reminder to summarize yesterday's PRs every morning at 9:00" — the `botmux-schedule` Skill handles it and confirms with you.
+Just say "add a reminder to summarize yesterday's PRs every morning at 9:00" — the `botbridge-schedule` Skill handles it and confirms with you.
 
 **Slash command (quick)**
 
@@ -322,11 +322,11 @@ Manage tasks:
 
 ## Configuration
 
-Configure bots via `~/.botmux/bots.json`. Run `botmux setup` to create it interactively, or edit manually.
+Configure bots via `~/.botbridge/bots.json`. Run `botbridge setup` to create it interactively, or edit manually.
 
 ```bash
 # Interactive setup
-botmux setup
+botbridge setup
 ```
 
 **bots.json format:**
@@ -360,7 +360,7 @@ botmux setup
 | `allowedUsers` | No | Allowed users (email prefixes or open_ids) |
 | `projectScanDir` | No | Directory to scan for git repos |
 
-**Config priority:** `BOTS_CONFIG` env var > `~/.botmux/bots.json`
+**Config priority:** `BOTS_CONFIG` env var > `~/.botbridge/bots.json`
 
 ### Environment Variables
 
@@ -369,16 +369,16 @@ botmux setup
 | `BOTS_CONFIG` | _(unset)_ | Path to bots.json (overrides default location) |
 | `WEB_HOST` | `0.0.0.0` | HTTP server bind address |
 | `WEB_EXTERNAL_HOST` | _(auto-detect LAN IP)_ | External hostname/IP for terminal URLs |
-| `SESSION_DATA_DIR` | `~/.botmux/data` | Where sessions and queues are stored |
+| `SESSION_DATA_DIR` | `~/.botbridge/data` | Where sessions and queues are stored |
 | `DEBUG` | _(unset)_ | Set to `1` for debug logging |
 
 ### File Locations
 
 | Path | Description |
 |------|-------------|
-| `~/.botmux/bots.json` | Bot configuration |
-| `~/.botmux/data/` | Session data, message queues |
-| `~/.botmux/logs/` | Daemon logs |
+| `~/.botbridge/bots.json` | Bot configuration |
+| `~/.botbridge/data/` | Session data, message queues |
+| `~/.botbridge/logs/` | Daemon logs |
 
 ---
 
@@ -386,31 +386,31 @@ botmux setup
 
 | Command | Description |
 |---------|-------------|
-| `botmux setup` | Interactive setup (first-time or add bots) |
-| `botmux start` | Start daemon (PM2 managed) |
-| `botmux stop` | Stop daemon |
-| `botmux restart` | Restart daemon (auto-restores active sessions) |
-| `botmux logs` | View daemon logs (`--lines N` for more) |
-| `botmux status` | Show daemon status |
-| `botmux upgrade` | Upgrade to latest version |
-| `botmux list` | List all active sessions (alias: `ls`) |
-| `botmux delete <id>` | Close a session by ID prefix (alias: `del`/`rm`) |
-| `botmux delete all` | Close all active sessions |
-| `botmux delete stopped` | Clean up zombie sessions with dead processes |
+| `botbridge setup` | Interactive setup (first-time or add bots) |
+| `botbridge start` | Start daemon (PM2 managed) |
+| `botbridge stop` | Stop daemon |
+| `botbridge restart` | Restart daemon (auto-restores active sessions) |
+| `botbridge logs` | View daemon logs (`--lines N` for more) |
+| `botbridge status` | Show daemon status |
+| `botbridge upgrade` | Upgrade to latest version |
+| `botbridge list` | List all active sessions (alias: `ls`) |
+| `botbridge delete <id>` | Close a session by ID prefix (alias: `del`/`rm`) |
+| `botbridge delete all` | Close all active sessions |
+| `botbridge delete stopped` | Clean up zombie sessions with dead processes |
 
 ### Agent-facing subcommands
 
-Run from inside a botmux-spawned CLI session — session context is auto-detected via ancestor process markers:
+Run from inside a botbridge-spawned CLI session — session context is auto-detected via ancestor process markers:
 
 | Subcommand | Description |
 |------------|-------------|
-| `botmux send [content]` | Send a message to the current thread (stdin / heredoc / `--content-file`; `--images` / `--files` / `--mention` flags) |
-| `botmux bots list` | List bots in the current chat (includes `open_id` for `--mention`) |
-| `botmux thread messages [--limit N]` | Fetch thread message history (JSON) |
-| `botmux schedule add <schedule> <prompt>` | Create a scheduled task bound to the current thread |
-| `botmux schedule list/remove/pause/resume/run` | Manage scheduled tasks |
+| `botbridge send [content]` | Send a message to the current thread (stdin / heredoc / `--content-file`; `--images` / `--files` / `--mention` flags) |
+| `botbridge bots list` | List bots in the current chat (includes `open_id` for `--mention`) |
+| `botbridge thread messages [--limit N]` | Fetch thread message history (JSON) |
+| `botbridge schedule add <schedule> <prompt>` | Create a scheduled task bound to the current thread |
+| `botbridge schedule list/remove/pause/resume/run` | Manage scheduled tasks |
 
-These require the `~/.botmux/bin/botmux` wrapper, which the daemon writes at startup and prepends to the worker's `PATH` — always matches the running daemon's version (no `npm i -g` needed).
+These require the `~/.botbridge/bin/botbridge` wrapper, which the daemon writes at startup and prepends to the worker's `PATH` — always matches the running daemon's version (no `npm i -g` needed).
 
 ---
 

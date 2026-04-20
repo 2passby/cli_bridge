@@ -82,14 +82,14 @@ async function sessionReply(rootId: string, content: string, msgType: string = '
 // ─── PID file ────────────────────────────────────────────────────────────────
 
 function getPidFile(): string {
-  const botIndex = process.env.BOTMUX_BOT_INDEX;
+  const botIndex = process.env.BOTBRIDGE_BOT_INDEX;
   const name = botIndex !== undefined ? `daemon-${botIndex}.pid` : 'daemon.pid';
   return join(config.session.dataDir, name);
 }
 
 /** Path to the wrapper bin directory — injected into worker PATH so CLIs
- *  can call `botmux send` / `botmux schedule` without a global npm install. */
-const BOTMUX_BIN_DIR = join(homedir(), '.botmux', 'bin');
+ *  can call `botbridge send` / `botbridge schedule` without a global npm install. */
+const BOTBRIDGE_BIN_DIR = join(homedir(), '.botbridge', 'bin');
 
 function writePidFile(): void {
   const dir = config.session.dataDir;
@@ -97,20 +97,20 @@ function writePidFile(): void {
     mkdirSync(dir, { recursive: true });
   }
   writeFileSync(getPidFile(), String(process.pid), 'utf-8');
-  // Write breadcrumb so CLI tools (botmux list/delete) can find the active data dir
-  const breadcrumb = join(homedir(), '.botmux', '.data-dir');
+  // Write breadcrumb so CLI tools (botbridge list/delete) can find the active data dir
+  const breadcrumb = join(homedir(), '.botbridge', '.data-dir');
   try {
-    mkdirSync(join(homedir(), '.botmux'), { recursive: true });
+    mkdirSync(join(homedir(), '.botbridge'), { recursive: true });
     writeFileSync(breadcrumb, config.session.dataDir, 'utf-8');
   } catch { /* best effort */ }
 
-  // Write a thin wrapper script so `botmux` is always in PATH for CLI sessions,
+  // Write a thin wrapper script so `botbridge` is always in PATH for CLI sessions,
   // regardless of whether the package was installed globally.  The wrapper
   // points at THIS daemon's dist/cli.js, so it's always the same version.
   try {
-    mkdirSync(BOTMUX_BIN_DIR, { recursive: true });
+    mkdirSync(BOTBRIDGE_BIN_DIR, { recursive: true });
     const cliScript = join(__dirname, 'cli.js');  // dist/cli.js
-    const wrapper = join(BOTMUX_BIN_DIR, 'botmux');
+    const wrapper = join(BOTBRIDGE_BIN_DIR, 'botbridge');
     const content = `#!/bin/sh\nexec node "${cliScript}" "$@"\n`;
     // Only write if changed (avoid unnecessary disk writes on every restart)
     let existing = '';
@@ -120,7 +120,7 @@ function writePidFile(): void {
       logger.info(`Wrapper script written: ${wrapper} → ${cliScript}`);
     }
   } catch (err: any) {
-    logger.warn(`Failed to write botmux wrapper script: ${err.message}`);
+    logger.warn(`Failed to write botbridge wrapper script: ${err.message}`);
   }
 
   logger.info(`PID file written: ${getPidFile()} (pid: ${process.pid})`);
@@ -661,7 +661,7 @@ export async function startDaemon(botIndex?: number): Promise<void> {
   const botConfigs = loadBotConfigs();
   const idx = botIndex ?? 0;
   if (idx < 0 || idx >= botConfigs.length) {
-    throw new Error(`Invalid BOTMUX_BOT_INDEX=${idx}, only ${botConfigs.length} bot(s) configured`);
+    throw new Error(`Invalid BOTBRIDGE_BOT_INDEX=${idx}, only ${botConfigs.length} bot(s) configured`);
   }
   const cfg = botConfigs[idx];
   registerBot(cfg);

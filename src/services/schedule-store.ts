@@ -77,7 +77,7 @@ function load(): void {
     try { currentMtime = statSync(fp).mtimeMs; } catch { /* ignore */ }
   }
 
-  // Reload if file has been modified externally (e.g. by `botmux schedule add`)
+  // Reload if file has been modified externally (e.g. by `botbridge schedule add`)
   // or on first load.
   if (loaded && currentMtime === cachedMtime) return;
 

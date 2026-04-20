@@ -201,7 +201,7 @@ describe('loadBotConfigs', () => {
     expect(configs[0].cliId).toBe('claude-code'); // default
   });
 
-  it('should fall back to ~/.botmux/bots.json when BOTS_CONFIG is not set', () => {
+  it('should fall back to ~/.botbridge/bots.json when BOTS_CONFIG is not set', () => {
     // No BOTS_CONFIG env var
     // existsSync: first call (for BOTS_CONFIG) won't happen since env isn't set,
     // second call for default path should return true

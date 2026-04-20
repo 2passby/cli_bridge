@@ -1,11 +1,11 @@
 {
-  "name": "botmux",
+  "name": "botbridge",
   "version": "0.0.0",
-  "description": "Bridge between IM platforms and AI coding CLIs — one topic, one CLI session with live streaming",
+  "description": "Bridge between IM platforms and AI coding CLIs \u2014 one topic, one CLI session with live streaming",
   "type": "module",
   "main": "dist/index-daemon.js",
   "bin": {
-    "botmux": "dist/cli.js"
+    "botbridge": "dist/cli.js"
   },
   "files": [
     "dist/",
@@ -60,5 +60,6 @@
   "engines": {
     "node": ">=20"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "packageManager": "pnpm@8.15.1+sha512.831cf4c5f8b8374af71521d4d153db49d7086de615c2af7cb5e9d7eb8ba630ddac46fea495d643e552ef2e68a3aa99a3e5e9fbee8696702967504df5c59cb273"
 }

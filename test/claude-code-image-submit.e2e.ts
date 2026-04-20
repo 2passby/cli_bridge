@@ -178,7 +178,7 @@ describe('Claude Code image/attachment message submission', () => {
   it('multi-line content structure matches what daemon sends to worker', () => {
     const content = buildImageReplyContent(
       '看起来表格不是很整齐呢？',
-      '/root/.botmux/data/attachments/om_xxx/img_v3_abc.jpg',
+      '/root/.botbridge/data/attachments/om_xxx/img_v3_abc.jpg',
     );
     console.log(`[structure] Full content:\n${content}`);
     console.log(`[structure] JSON: ${JSON.stringify(content)}`);
@@ -186,7 +186,7 @@ describe('Claude Code image/attachment message submission', () => {
     // Verify structure
     expect(content).toContain('看起来表格不是很整齐呢？');
     expect(content).toContain('附件（使用 Read 工具查看）：');
-    expect(content).toContain('- /root/.botmux/data/attachments/');
+    expect(content).toContain('- /root/.botbridge/data/attachments/');
 
     // Count newlines — these are the problematic characters for PTY write
     const newlines = (content.match(/\n/g) || []).length;

@@ -187,14 +187,14 @@ describe('discoverAdoptableSessions', () => {
     expect(results[1]!.paneRows).toBe(50);
   });
 
-  it('should skip bmx-* prefixed sessions', () => {
+  it('should skip bbg-* prefixed sessions', () => {
     setupMocks({
-      paneLines: 'bmx-abc12345:0.0 1000\nmysession:0.0 2000\n',
+      paneLines: 'bbg-abc12345:0.0 1000\nmysession:0.0 2000\n',
       // The bmx pane has a claude process but should be skipped
       commMap: { 1000: 'zsh', 1001: 'claude', 2000: 'zsh', 2001: 'codex' },
       childMap: { 1000: [1001], 2000: [2001] },
       cwdMap: { 1001: '/project/a', 2001: '/project/b' },
-      dimsMap: { 'bmx-abc12345:0.0': '80 24', 'mysession:0.0': '120 40' },
+      dimsMap: { 'bbg-abc12345:0.0': '80 24', 'mysession:0.0': '120 40' },
     });
 
     const results = discoverAdoptableSessions();

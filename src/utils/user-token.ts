@@ -1,11 +1,11 @@
 /**
- * User Access Token — self-contained OAuth token management for botmux.
+ * User Access Token — self-contained OAuth token management for botbridge.
  *
  * Token storage:
  *   1. FEISHU_USER_ACCESS_TOKEN env var
- *   2. ~/.botmux/data/user-token.json
+ *   2. ~/.botbridge/data/user-token.json
  *
- * OAuth login via /login command writes to botmux's own token file.
+ * OAuth login via /login command writes to botbridge's own token file.
  * Auto-refreshes expired access_token using refresh_token.
  */
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
@@ -16,7 +16,7 @@ import { logger } from './logger.js';
 
 // ─── Token paths ──────────────────────────────────────────────────────────────
 
-const BOTMUX_TOKEN_PATH = join(homedir(), '.botmux', 'data', 'user-token.json');
+const BOTBRIDGE_TOKEN_PATH = join(homedir(), '.botbridge', 'data', 'user-token.json');
 const BUFFER_MS = 60_000; // 60s safety margin before expiry
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -63,7 +63,7 @@ function loadTokenFromPath(path: string): TokenStore | null {
   }
 }
 
-function saveToken(token: TokenStore, path: string = BOTMUX_TOKEN_PATH): void {
+function saveToken(token: TokenStore, path: string = BOTBRIDGE_TOKEN_PATH): void {
   const dir = dirname(path);
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
   writeFileSync(path, JSON.stringify(token, null, 2));
@@ -74,10 +74,10 @@ function isValid(isoDate: string): boolean {
   return Date.now() + BUFFER_MS < new Date(isoDate).getTime();
 }
 
-/** Load token from botmux's own file. */
+/** Load token from botbridge's own file. */
 function loadToken(): { token: TokenStore; source: string } | null {
-  const token = loadTokenFromPath(BOTMUX_TOKEN_PATH);
-  if (token) return { token, source: 'botmux' };
+  const token = loadTokenFromPath(BOTBRIDGE_TOKEN_PATH);
+  if (token) return { token, source: 'botbridge' };
   return null;
 }
 
@@ -111,7 +111,7 @@ async function refreshToken(token: TokenStore, appId: string, appSecret: string)
       scope: data.scope || token.scope,
     };
 
-    // Always write to botmux's own file
+    // Always write to botbridge's own file
     try { saveToken(updated); } catch { /* best-effort */ }
     logger.info('[user-token] Refreshed User Access Token');
     return updated;
@@ -132,7 +132,7 @@ export async function resolveUserToken(appId: string, appSecret: string): Promis
   const envToken = process.env.FEISHU_USER_ACCESS_TOKEN;
   if (envToken) return envToken;
 
-  // 2. Token files (botmux own → feishu-cli fallback)
+  // 2. Token files (botbridge own → feishu-cli fallback)
   const loaded = loadToken();
   if (!loaded) return null;
 

@@ -31,10 +31,10 @@ function ensureFontRegistered(): void {
 
   // 1. Project-bundled font(s) under assets/fonts/ — drop a TTF here to override defaults.
   const projectFontDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'assets', 'fonts');
-  for (const fname of ['BotmuxMono-Regular.ttf', 'BotmuxMono.ttf', 'BotmuxMono-Regular.otf']) {
-    if (tryRegister(join(projectFontDir, fname), 'BotmuxMono')) {
-      tryRegister(join(projectFontDir, 'BotmuxMono-Bold.ttf'), 'BotmuxMono');
-      fontFamilyChain.push('BotmuxMono');
+  for (const fname of ['BotbridgeMono-Regular.ttf', 'BotbridgeMono.ttf', 'BotbridgeMono-Regular.otf']) {
+    if (tryRegister(join(projectFontDir, fname), 'BotbridgeMono')) {
+      tryRegister(join(projectFontDir, 'BotbridgeMono-Bold.ttf'), 'BotbridgeMono');
+      fontFamilyChain.push('BotbridgeMono');
       break;
     }
   }

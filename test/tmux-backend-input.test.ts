@@ -29,7 +29,7 @@ const mockedExecFileSync = vi.mocked(execFileSync);
 // Helpers
 // ---------------------------------------------------------------------------
 
-function createBackend(sessionName = 'bmx-test1234'): TmuxBackend {
+function createBackend(sessionName = 'bbg-test1234'): TmuxBackend {
   return new TmuxBackend(sessionName);
 }
 
@@ -61,12 +61,12 @@ describe('TmuxBackend.sendText', () => {
   });
 
   it('targets the correct tmux session', () => {
-    const be = createBackend('bmx-mysess');
+    const be = createBackend('bbg-mysess');
     be.sendText('test');
 
     const calls = getCalls();
     const tIdx = calls[0].args.indexOf('-t');
-    expect(calls[0].args[tIdx + 1]).toBe('bmx-mysess');
+    expect(calls[0].args[tIdx + 1]).toBe('bbg-mysess');
   });
 });
 
@@ -117,14 +117,14 @@ describe('TmuxBackend.pasteText', () => {
   });
 
   it('targets the correct session in paste-buffer', () => {
-    const be = createBackend('bmx-target');
+    const be = createBackend('bbg-target');
     be.pasteText('content');
 
     const calls = getCalls();
     const pasteCall = calls[1];
     const tIdx = pasteCall.args.indexOf('-t');
     expect(tIdx).toBeGreaterThanOrEqual(0);
-    expect(pasteCall.args[tIdx + 1]).toBe('bmx-target');
+    expect(pasteCall.args[tIdx + 1]).toBe('bbg-target');
   });
 
   it('passes content via stdin to load-buffer', () => {
